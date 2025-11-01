@@ -52,26 +52,22 @@ jobs:
           ./gradlew assembleRelease
         
       - name: Publish APK
+        env:
+          SEND_TO_DISCORD: ${{ github.event.inputs.send_to_discord }}
+          PUBLISH_TO_RELEASES: ${{ github.event.inputs.publish_to_releases }}
+          PUBLISH_ARTIFACT: ${{ github.event.inputs.publish_artifact }}
         run: |
           TIMESTAMP=$(TZ='Asia/Dhaka' date +'%Y%m%d-%H%M')
           BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
           SHORT_SHA="${GITHUB_SHA:0:7}"
           
-          CONTENT=$(echo -e "\`$SHORT_SHA\`")
+          CONTENT=$(echo -e "<@${{ secrets.USER_ID }}>  \`$SHORT_SHA\`")
           
           mv "app/build/outputs/apk/release/app-release.apk" "app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk"
           
-          if [[ -n "${{ github.event.inputs.send_to_discord }}" ]]; then
+          if [ "$SEND_TO_DISCORD" = "true" ]; then
             curl -s -o /dev/null -X POST "https://discord.com/api/v10/channels/${{ secrets.CHANNEL_ID }}/messages" \
             -H "Authorization: Bot $BOT_TOKEN" \
             -F "content=$CONTENT" \
-            "-F "file=@app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk"
-          fi
-          
-          if [ "${{ github.event.inputs.publish_to_releases }}" == "true" ]; then
-            # TODO
-          fi
-            
-          if [ "${{ github.event.inputs.publish_artifact }}" == "true" ]; then
-            # TODO
+            -F "file=@app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk"
           fi
