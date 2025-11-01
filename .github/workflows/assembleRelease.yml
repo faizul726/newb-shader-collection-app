@@ -67,9 +67,15 @@ jobs:
           mv "app/build/outputs/apk/release/app-release.apk" "app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk"
           ls "app/build/outputs/apk/release"
           
+          ls -l "app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk"
+          
+          echo [ -F "file=@app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk" ]
+          
           if [ "$SEND_TO_DISCORD" = "true" ]; then
-            curl -s -o /dev/null -X POST "https://discord.com/api/v10/channels/${{ secrets.CHANNEL_ID }}/messages" \
+            curl -X POST "https://discord.com/api/v10/channels/${{ secrets.CHANNEL_ID }}/messages" \
             -H "Authorization: Bot $BOT_TOKEN" \
-            -F "content=$CONTENT" \
-            -F "file=@app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk"
+            -F "file=@app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk" \
+            -F "content=$CONTENT"
           fi
+          
+          # -s -o /dev/null 
