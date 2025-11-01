@@ -39,7 +39,7 @@ jobs:
         run: |
           KEYSTORE_PATH="$RUNNER_TEMP/keystore"
           mkdir "$KEYSTORE_PATH"
-          echo $KEYSTORE_BASE64 | base64 --decore --ignore-garbage > "$KEYSTORE_PATH/keystore.jks"
+          echo $KEYSTORE_BASE64 | base64 --decode --ignore-garbage > "$KEYSTORE_PATH/keystore.jks"
       
       - name: Build with Gradle
         env:
