@@ -72,7 +72,7 @@ jobs:
           #echo [ -F "file=@app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk" ]
           
           if [ "$SEND_TO_DISCORD" = "true" ]; then
-            curl -s -o /dev/null -X POST "https://discord.com/api/v10/channels/${{ secrets.CHANNEL_ID }}/messages" \
+            curl -X POST "https://discord.com/api/v10/channels/${{ secrets.CHANNEL_ID }}/messages" \
             -H "Authorization: Bot $BOT_TOKEN" \
             -F "file=@app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk" \
             -F "content=$CONTENT"
