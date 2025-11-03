@@ -3,7 +3,6 @@ package dev.faizul726.newbshadercollection.data
 import androidx.compose.ui.res.painterResource
 import dev.faizul726.newbshadercollection.data.models.Shader
 import dev.faizul726.newbshadercollection.R
-import dev.faizul726.newbshadercollection.ui.components.Platforms
 
 /*
 val shaders = listOf(

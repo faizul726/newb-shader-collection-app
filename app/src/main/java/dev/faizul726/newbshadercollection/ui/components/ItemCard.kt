@@ -1,5 +1,6 @@
 package dev.faizul726.newbshadercollection.ui.components
 
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,16 +27,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.faizul726.newbshadercollection.R
+import dev.faizul726.newbshadercollection.data.bottomSheetLinks
+import dev.faizul726.newbshadercollection.data.models.OtherLink
+import dev.faizul726.newbshadercollection.data.models.Platforms
+import dev.faizul726.newbshadercollection.data.showBottomSheet
+import dev.faizul726.newbshadercollection.utils.downloadFile
 import kotlinx.serialization.Serializable
-
-@Serializable
-enum class Platforms {
-    ANDROID, IOS, WINDOWS
-}
 
 @Composable
 internal fun ItemCard(
@@ -44,8 +46,10 @@ internal fun ItemCard(
     creator: String,
     platforms: Set<Platforms>,
     downloadLink: String,
-    links: Set<String>
+    links: Set<OtherLink>
 ) {
+    val context = LocalContext.current
+
     Surface(
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.fillMaxWidth().padding(8.dp).height(168.dp)
@@ -103,7 +107,14 @@ internal fun ItemCard(
                             contentColor = MaterialTheme.colorScheme.primary,
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
-                        onClick = {}
+                        onClick = {
+                            downloadFile(
+                                title = title,
+                                url = downloadLink,
+                                context = context
+                            )
+                            Toast.makeText(context, "Download started...", Toast.LENGTH_SHORT).show()
+                        }
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.download),
@@ -116,7 +127,13 @@ internal fun ItemCard(
                                 contentColor = MaterialTheme.colorScheme.primary,
                                 containerColor = MaterialTheme.colorScheme.primaryContainer
                             ),
-                            onClick = {}
+                            onClick = {
+                                bottomSheetLinks.apply {
+                                    clear()
+                                    addAll(links)
+                                }
+                                showBottomSheet.value = true
+                            }
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.globe),

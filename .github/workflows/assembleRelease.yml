@@ -1,6 +1,7 @@
 name: 'assembleRelease'
 
 on:
+  push:
   workflow_dispatch:
     inputs:
       send_to_discord:
@@ -15,7 +16,6 @@ on:
         required: true
         default: false
         type: boolean
-        
   
 jobs:
   build:
@@ -57,19 +57,19 @@ jobs:
           PUBLISH_TO_RELEASES: ${{ github.event.inputs.publish_to_releases }}
           PUBLISH_ARTIFACT: ${{ github.event.inputs.publish_artifact }}
         run: |
-          TIMESTAMP=$(TZ='Asia/Dhaka' date +'%Y%m%d-%H%M')
+          #TIMESTAMP=$(TZ='Asia/Dhaka' date +'%Y%m%d-%H%M')
           BOT_TOKEN="${{ secrets.BOT_TOKEN }}"
           SHORT_SHA="${GITHUB_SHA:0:7}"
           
           CONTENT=$(echo -e "'<@${{ secrets.USER_ID }}>'  \`$SHORT_SHA\`")
-          echo $SHORT_SHA
+          #echo $SHORT_SHA
           
           mv "app/build/outputs/apk/release/app-release.apk" "app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk"
-          ls "app/build/outputs/apk/release"
+          #ls "app/build/outputs/apk/release"
           
-          ls -l "app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk"
+          #ls -l "app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk"
           
-          echo [ -F "file=@app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk" ]
+          #echo [ -F "file=@app/build/outputs/apk/release/NewbShaderCollection_$SHORT_SHA.apk" ]
           
           if [ "$SEND_TO_DISCORD" = "true" ]; then
             curl -s -o /dev/null -X POST "https://discord.com/api/v10/channels/${{ secrets.CHANNEL_ID }}/messages" \
