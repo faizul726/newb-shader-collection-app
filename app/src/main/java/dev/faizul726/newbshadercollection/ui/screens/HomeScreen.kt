@@ -1,8 +1,6 @@
 package dev.faizul726.newbshadercollection.ui.screens
 
-import android.content.ClipData
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -18,15 +16,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -35,60 +26,24 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import dev.faizul726.newbshadercollection.data.bottomSheetLinks
 import dev.faizul726.newbshadercollection.data.models.Shader
+import dev.faizul726.newbshadercollection.data.models.ShaderVersion
 import dev.faizul726.newbshadercollection.data.showBottomSheet
 import dev.faizul726.newbshadercollection.ui.components.ItemCard
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import kotlinx.serialization.ExperimentalSerializationApi
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSerializationApi::class)
 @Composable
-internal fun HomeScreen(modifier: Modifier) {
+internal fun HomeScreen(
+    modifier: Modifier,
+    shaders: List<Shader>,
+    shaderVersions: List<ShaderVersion>
+) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     val uri = LocalUriHandler.current
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
-
-    val jsonLink = "https://raw.githubusercontent.com/faizul726/newb-shader-repo/refs/heads/main/shader-list-testing.json"
-
-    val okHttpClient = OkHttpClient()
-
-    val request = Request.Builder()
-        .url(jsonLink)
-        .build()
-
-    // Thanks https://stackoverflow.com/questions/32598044/how-can-i-extract-the-raw-json-string-from-an-okhttp-response-object
-
-    lateinit var json: String
-    var shaders by remember { mutableStateOf(emptyList<Shader>()) }
-
-    val kJson = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        coerceInputValues = true
-        allowTrailingComma = true
-    }
-
-    LaunchedEffect(Unit) {
-        scope.launch(Dispatchers.IO) {
-            json = try {
-                val j = okHttpClient.newCall(request).execute().body.string()
-                Log.d("HomeScreen", j)
-                j
-            } catch (e: Exception) {
-                """
-                    {
-                    
-                    }
-                """.trimIndent()
-            }
-            shaders = kJson.decodeFromString<List<Shader>>(json)
-        }
-    }
 
     LazyColumn {
         item {
@@ -96,12 +51,15 @@ internal fun HomeScreen(modifier: Modifier) {
         }
         items(shaders) {
             ItemCard(
-                thumbnail = it.thumbnail,
+                id = it.id,
                 title = it.title,
                 creator = it.creator,
-                platforms = it.platforms,
+                screenshots = it.screenshots,
+                supportedVersion = it.supportedVersion,
+                supportedPlatforms = it.platforms,
                 downloadLink = it.downloadLink,
-                links = it.otherLinks
+                links = it.otherLinks,
+                shaderVersions = shaderVersions
             )
         }
         item {

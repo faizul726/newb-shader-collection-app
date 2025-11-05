@@ -1,11 +1,7 @@
 package dev.faizul726.newbshadercollection
 
-import android.app.DownloadManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -25,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,11 +29,26 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import dev.faizul726.newbshadercollection.data.SHADER_REPO
+import dev.faizul726.newbshadercollection.data.SHADER_VERSIONS
+import dev.faizul726.newbshadercollection.data.customJson
+import dev.faizul726.newbshadercollection.data.models.Shader
+import dev.faizul726.newbshadercollection.data.models.ShaderVersion
 import dev.faizul726.newbshadercollection.ui.screens.HomeScreen
 import dev.faizul726.newbshadercollection.ui.theme.NewbShaderCollectionTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.serialization.ExperimentalSerializationApi
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 
+@OptIn(ExperimentalSerializationApi::class)
 class MainActivity : ComponentActivity() {
+    companion object {
+        internal val okHttpClient = OkHttpClient()
+    }
     /*internal var downloadId: Long = 0
 
     private val onDownloadComplete: BroadcastReceiver = object : BroadcastReceiver() {
@@ -55,6 +67,42 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            var shaders by remember { mutableStateOf(emptyList<Shader>()) }
+            var shaderVersions by remember { mutableStateOf(emptyList<ShaderVersion>()) }
+
+            LaunchedEffect(Unit) {
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    shaders = run {
+                        val shadersRequest = Request.Builder()
+                            .url(SHADER_REPO)
+                            .build()
+
+                        val json = try {
+                            val j = okHttpClient.newCall(shadersRequest).execute().body.string()
+                            Log.d("Fzul", j)
+                            j
+                        } catch(e: Exception) {
+                            "[]"
+                        }
+                        customJson.decodeFromString(json)
+                    }
+
+                    shaderVersions = run {
+                        val shaderVersionsRequest = Request.Builder()
+                            .url(SHADER_VERSIONS)
+                            .build()
+
+                        val json = try {
+                            okHttpClient.newCall(shaderVersionsRequest).execute().body.string()
+                        } catch(e: Exception) {
+                            Log.d("Oh no", "2")
+                            "[]"
+                        }
+                        customJson.decodeFromString(json)
+                    }
+                }
+            }
             NewbShaderCollectionTheme {
                 Scaffold(
                     topBar = {
@@ -121,7 +169,7 @@ class MainActivity : ComponentActivity() {
                     },
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
-                    HomeScreen(Modifier.padding(innerPadding))
+                    HomeScreen(Modifier.padding(innerPadding), shaders, shaderVersions)
                 }
             }
         }

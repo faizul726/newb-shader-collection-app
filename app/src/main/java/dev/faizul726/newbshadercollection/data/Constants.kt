@@ -1,8 +1,18 @@
 package dev.faizul726.newbshadercollection.data
 
-import androidx.compose.ui.res.painterResource
-import dev.faizul726.newbshadercollection.data.models.Shader
-import dev.faizul726.newbshadercollection.R
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+
+const val SHADER_REPO = "https://raw.githubusercontent.com/faizul726/newb-shader-repo/refs/heads/main/shader-list-testing.json"
+const val SHADER_VERSIONS = "https://github.com/faizul726/newb-shader-repo/raw/refs/heads/main/shader-versions-testing.json"
+
+@OptIn(ExperimentalSerializationApi::class)
+val customJson = Json {
+    ignoreUnknownKeys = true
+    isLenient = true
+    coerceInputValues = true
+    allowTrailingComma = true
+}
 
 /*
 val shaders = listOf(

@@ -1,9 +1,11 @@
 package dev.faizul726.newbshadercollection.ui.components
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -29,30 +32,54 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import dev.faizul726.newbshadercollection.R
+import dev.faizul726.newbshadercollection.ShaderDetailsActivity
 import dev.faizul726.newbshadercollection.data.bottomSheetLinks
 import dev.faizul726.newbshadercollection.data.models.OtherLink
 import dev.faizul726.newbshadercollection.data.models.Platforms
+import dev.faizul726.newbshadercollection.data.models.ShaderVersion
+import dev.faizul726.newbshadercollection.data.shaderPageToOpen
 import dev.faizul726.newbshadercollection.data.showBottomSheet
+import dev.faizul726.newbshadercollection.ui.screens.ShaderScreen
 import dev.faizul726.newbshadercollection.utils.downloadFile
 import kotlinx.serialization.Serializable
 
 @Composable
 internal fun ItemCard(
+    id: Int?,
     title: String,
-    thumbnail: String,
     creator: String,
-    platforms: Set<Platforms>,
+    screenshots: List<String>,
+    supportedVersion: String,
+    supportedPlatforms: Set<Platforms>,
     downloadLink: String,
-    links: Set<OtherLink>
+    links: Set<OtherLink>,
+    shaderVersions: List<ShaderVersion>
 ) {
     val context = LocalContext.current
 
     Surface(
         shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth().padding(8.dp).height(168.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .height(168.dp)
+            .combinedClickable(
+                onClick = {
+                    val intent = Intent(context, ShaderDetailsActivity::class.java).apply {
+                        putExtra("TITLE", title)
+                        //putExtra("DESCRIPTION", )
+                        putExtra("SCREENSHOTS", screenshots.toTypedArray())
+                    }
+                    context.startActivity(intent)
+                },
+                onLongClick = {
+
+                }
+            )
     ) {
         /*Image(
             painter = painterResource(backgroundImage),
@@ -60,7 +87,7 @@ internal fun ItemCard(
             contentScale = ContentScale.Crop
         )*/
         AsyncImage(
-            model = thumbnail,
+            model = screenshots[0],
             contentScale = ContentScale.Crop,
             contentDescription = null
         )
@@ -81,28 +108,36 @@ internal fun ItemCard(
             Box(Modifier.fillMaxSize()) {
                 Column(Modifier.align(Alignment.CenterStart).padding(start = 8.dp)) {
                     Text(title, color = Color.White, style = MaterialTheme.typography.headlineMedium)
-                    Text("by $creator", color = Color.White.copy(alpha = 0.75f), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = "by $creator",
+                        color = Color.White.copy(alpha = 0.75f),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textDecoration = TextDecoration.Underline
+                    )
+                }
+                Badge(
+                    modifier = Modifier.align(Alignment.TopEnd)
+                ) {
+                    Text(
+                        text = (shaderVersions.firstOrNull { v -> v.base == supportedVersion}?.let { "v" + it.base }) ?: "Unknown"
+                    )
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.align(Alignment.BottomStart).padding(start = 6.dp, bottom = 6.dp).height(20.dp)
                 ) {
-                    if (Platforms.ANDROID in platforms) {
-                        Icon(painterResource(R.drawable.android), null, tint = Color.White)
-                    }
-                    if (Platforms.IOS in platforms) {
-                        Icon(painterResource(R.drawable.ios), null, tint = Color.White)
-                    }
-                    if (Platforms.WINDOWS in platforms) {
-                        Icon(painterResource(R.drawable.windows), null, tint = Color.White)
+                    when {
+                        Platforms.ANDROID in supportedPlatforms -> Icon(painterResource(R.drawable.android), null, tint = Color.White)
+                        Platforms.IOS in supportedPlatforms -> Icon(painterResource(R.drawable.ios), null, tint = Color.White)
+                        Platforms.WINDOWS in supportedPlatforms -> Icon(painterResource(R.drawable.windows), null, tint = Color.White)
                     }
                 }
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.align(Alignment.BottomEnd)
                 ) {
-                    Button(
+                    /*Button(
                         colors = ButtonDefaults.buttonColors(
                             contentColor = MaterialTheme.colorScheme.primary,
                             containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -140,7 +175,7 @@ internal fun ItemCard(
                                 contentDescription = null
                             )
                         }
-                    }
+                    }*/
                 }
             }
         }
