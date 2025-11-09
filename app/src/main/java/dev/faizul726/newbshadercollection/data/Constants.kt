@@ -3,8 +3,11 @@ package dev.faizul726.newbshadercollection.data
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 
-const val SHADER_REPO = "https://raw.githubusercontent.com/faizul726/newb-shader-repo/refs/heads/main/shader-list-testing.json"
-const val SHADER_VERSIONS = "https://github.com/faizul726/newb-shader-repo/raw/refs/heads/main/shader-versions-testing.json"
+const val REPO = "https://raw.githubusercontent.com/faizul726/newb-shader-repo/refs/heads/main"
+
+const val SHADER_REPO = "$REPO/shader-list-testing.json"
+const val SHADER_VERSIONS = "$REPO/shader-versions-testing.json"
+const val DEVELOPERS = "$REPO/developers"
 
 @OptIn(ExperimentalSerializationApi::class)
 val customJson = Json {
